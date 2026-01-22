@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Feedback App</title>
+
+<style>
+body {
+  margin:0;
+  font-family:Segoe UI,sans-serif;
+  background:linear-gradient(135deg,#ff9a9e,#fad0c4,#fbc2eb);
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+.container {
+  background:white;
+  width:90%;
+  max-width:520px;
+  padding:25px;
+  border-radius:16px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.2);
+  text-align:center;
+}
+h1 {color:#ff4b5c;}
+.options button{
+  width:45%;margin:8px;padding:12px;border:none;border-radius:10px;
+  font-size:16px;cursor:pointer;
+  background:linear-gradient(135deg,#42e695,#3bb2b8);
+  color:white;transition:.3s;
+}
+.options button:hover{transform:scale(1.05);}
+textarea{
+  width:100%;height:70px;border-radius:8px;border:1px solid #ccc;padding:8px;
+}
+.submit{
+  margin-top:10px;padding:10px 20px;border:none;border-radius:20px;
+  background:linear-gradient(135deg,#ff4b5c,#ff9068);
+  color:white;font-size:16px;cursor:pointer;
+}
+.feedback-box{
+  margin-top:15px;background:#f7f7f7;padding:10px;border-radius:8px;
+  max-height:150px;overflow-y:auto;text-align:left;
+}
+.hidden{display:none;}
+.admin-btn{
+  margin-top:10px;font-size:12px;background:none;border:none;color:#555;cursor:pointer;
+}
+.delete{color:red;cursor:pointer;font-size:12px;}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- USER PANEL -->
+<div id="userPanel">
+<h1>Choose & Give Feedback</h1>
+
+<div class="options">
+  <button onclick="selectOption('Math')">Math</button>
+  <button onclick="selectOption('Science')">Science</button>
+  <button onclick="selectOption('English')">English</button>
+  <button onclick="selectOption('Computer')">Computer</button>
+</div>
+
+<h3 id="selected"></h3>
+
+<textarea id="feedback" placeholder="Write your feedback..."></textarea>
+<button class="submit" onclick="submitFeedback()">Submit</button>
+
+<h3>Feedback for this option</h3>
+<div id="allFeedback" class="feedback-box"></div>
+
+<button class="admin-btn" onclick="showAdmin()">Admin Login</button>
+</div>
+
+<!-- ADMIN LOGIN -->
+<div id="loginPanel" class="hidden">
+<h1>Admin Login</h1>
+<input id="adminUser" placeholder="Username"><br><br>
+<input id="adminPass" type="password" placeholder="Password"><br><br>
+<button class="submit" onclick="loginAdmin()">Login</button>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel" class="hidden">
+<h1>Admin Panel</h1>
+<div id="adminData" class="feedback-box"></div>
+<button class="submit" onclick="logout()">Logout</button>
+</div>
+
+</div>
+
+<script>
+let chosenOption="";
+const ADMIN_USER="admin";
+const ADMIN_PASS="1234";
+
+function selectOption(option){
+  chosenOption=option;
+  document.getElementById("selected").innerText="Selected: "+option;
+  showFeedback();
+}
+
+function submitFeedback(){
+  const msg=document.getElementById("feedback").value.trim();
+  if(!chosenOption||!msg){alert("Select option and write feedback!");return;}
+  let data=JSON.parse(localStorage.getItem("feedbackData"))||[];
+  data.push({option:chosenOption,message:msg});
+  localStorage.setItem("feedbackData",JSON.stringify(data));
+  document.getElementById("feedback").value="";
+  showFeedback();
+}
+
+function showFeedback(){
+  let data=JSON.parse(localStorage.getItem("feedbackData"))||[];
+  let html="";
+  data.filter(i=>i.option===chosenOption)
+      .forEach(i=>html+=`<p>• ${i.message}</p>`);
+  document.getElementById("allFeedback").innerHTML=html||"<i>No feedback yet</i>";
+}
+
+function showAdmin(){
+  document.getElementById("userPanel").classList.add("hidden");
+  document.getElementById("loginPanel").classList.remove("hidden");
+}
+
+function loginAdmin(){
+  const u=adminUser.value,p=adminPass.value;
+  if(u===ADMIN_USER && p===ADMIN_PASS){
+    loginPanel.classList.add("hidden");
+    adminPanel.classList.remove("hidden");
+    loadAdmin();
+  } else alert("Wrong login!");
+}
+
+function loadAdmin(){
+  let data=JSON.parse(localStorage.getItem("feedbackData"))||[];
+  let html="";
+  data.forEach((i,idx)=>{
+    html+=`<p><b>${i.option}:</b> ${i.message}
+    <span class="delete" onclick="del(${idx})">Delete</span></p>`;
+  });
+  adminData.innerHTML=html||"<i>No data</i>";
+}
+
+function del(i){
+  let data=JSON.parse(localStorage.getItem("feedbackData"))||[];
+  data.splice(i,1);
+  localStorage.setItem("feedbackData",JSON.stringify(data));
+  loadAdmin();
+}
+
+function logout(){
+  adminPanel.classList.add("hidden");
+  userPanel.classList.remove("hidden");
+}
+</script>
+
+</body>
+</html>
