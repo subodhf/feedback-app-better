@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Feedback App</title>
+  <style>
+    body {
+      font-family: Arial;
+      text-align: center;
+      background: #f4f4f4;
+    }
+    .options button {
+      margin: 10px;
+      padding: 15px 25px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    textarea {
+      width: 300px;
+      height: 80px;
+      margin-top: 10px;
+    }
+    #allFeedback {
+      margin-top: 20px;
+      background: white;
+      padding: 10px;
+      width: 60%;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>Choose an Option</h1>
+
+<div class="options">
+  <button onclick="selectOption('Option 1')">Option 1</button>
+  <button onclick="selectOption('Option 2')">Option 2</button>
+  <button onclick="selectOption('Option 3')">Option 3</button>
+  <button onclick="selectOption('Option 4')">Option 4</button>
+</div>
+
+<h2 id="selected"></h2>
+
+<textarea id="feedback" placeholder="Write your feedback..."></textarea>
+<br><br>
+<button onclick="submitFeedback()">Submit</button>
+
+<h2>All Feedback</h2>
+<div id="allFeedback"></div>
+
+<script>
+  let chosenOption = "";
+
+  function selectOption(option) {
+    chosenOption = option;
+    document.getElementById("selected").innerText = "Selected: " + option;
+  }
+
+  function submitFeedback() {
+    const feedback = document.getElementById("feedback").value;
+
+    if (!chosenOption || !feedback) {
+      alert("Select an option and write feedback!");
+      return;
+    }
+
+    let all = JSON.parse(localStorage.getItem("feedbackData")) || [];
+
+    all.push({
+      option: chosenOption,
+      message: feedback
+    });
+
+    localStorage.setItem("feedbackData", JSON.stringify(all));
+
+    document.getElementById("feedback").value = "";
+    showFeedback();
+  }
+
+  function showFeedback() {
+    let all = JSON.parse(localStorage.getItem("feedbackData")) || [];
+    let html = "";
+
+    all.forEach(item => {
+      html += `<p><b>${item.option}:</b> ${item.message}</p>`;
+    });
+
+    document.getElementById("allFeedback").innerHTML = html;
+  }
+
+  showFeedback();
+</script>
+
+</body>
+</html>
